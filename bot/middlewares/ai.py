@@ -20,7 +20,7 @@ class AiMiddleware(BaseMiddleware):
         event: Message,
         data: Dict[str, Any],
     ) -> Any:
-        if event.text or event.photo:
+        if event.text or event.photo or event.document:
             if event.from_user.id not in self.dialogs:
                 await self.dialogs.create_dialog(event.from_user.id)
                 await self.dialogs.remove_old_dialogs()

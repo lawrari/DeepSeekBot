@@ -60,9 +60,15 @@ class YandexOCR(BaseClient):
                 return response_json["folders"][0]["id"]
             
     @staticmethod
-    def encode_file(file_path):
-        with open(file_path, "rb") as fid:
-            file_content = fid.read()
+    def encode_file(file_input):
+        if isinstance(file_input, str):  # If it's a file path
+            with open(file_input, "rb") as fid:
+                file_content = fid.read()
+        elif isinstance(file_input, bytes):  # If it's already bytes
+            file_content = file_input
+        else:
+            raise TypeError("file_input must be a file path (str) or bytes")
+
         return base64.b64encode(file_content).decode("utf-8")
 
     async def recognize(self, image: str, *args, **kwargs):
