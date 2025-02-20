@@ -1,0 +1,15 @@
+environs
+sqlalchemy
+backoff
+typing_extensions
+aiohttp
+yarl
+msgspec
+aiogram
+betterlogging
+redis
+asyncpg
+alembic
+psycopg2
+openai
+openpyxl
