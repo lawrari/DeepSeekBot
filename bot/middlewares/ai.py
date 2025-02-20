@@ -5,12 +5,14 @@ from aiogram.types import Message
 
 from services.apis.DeepSeek.dialogs import Dialogs
 from services.apis.DeepSeek.deepseek import DeepSeek
+from services.apis.yandex_api import YandexOCR
 
 
 class AiMiddleware(BaseMiddleware):
-    def __init__(self, dialogs: Dialogs, client: DeepSeek) -> None:
+    def __init__(self, dialogs: Dialogs, deepseek_client: DeepSeek, yandex_client: YandexOCR) -> None:
         self.dialogs = dialogs
-        self.client = client
+        self.deepseek_client = deepseek_client
+        self.yandex_client = yandex_client
 
     async def __call__(
         self,
@@ -25,6 +27,7 @@ class AiMiddleware(BaseMiddleware):
 
         data['dialogs'] = self.dialogs
         data['dialog'] = self.dialogs.dialogs.get(event.from_user.id)
-        data['ai_client'] = self.client
+        data['ai_client'] = self.deepseek_client
+        data['yandex_ocr'] = self.yandex_client
         result = await handler(event, data)
         return result

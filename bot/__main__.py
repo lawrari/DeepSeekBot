@@ -18,6 +18,7 @@ from bot.middlewares.ai import AiMiddleware
 from bot.utils import broadcaster
 from services.apis.DeepSeek.dialogs import Dialogs
 from services.apis.DeepSeek.deepseek import DeepSeek
+from services.apis.yandex_api import YandexOCR
 
 from bot.handlers import (referral_start_router,
                           admin_start_router,
@@ -34,10 +35,10 @@ async def on_startup(bot: Bot, admin_ids: list[int]):
     await bot.set_my_commands(commands=[BotCommand(command='start', description='Меню')])
 
 
-def register_global_middlewares(dp: Dispatcher, config: Config, dialogs: Dialogs, deepseek_client: DeepSeek):
+def register_global_middlewares(dp: Dispatcher, config: Config, dialogs: Dialogs, deepseek_client: DeepSeek, yandex_client: YandexOCR):
     middleware_types = [
         ConfigMiddleware(config),
-        AiMiddleware(dialogs, deepseek_client)
+        AiMiddleware(dialogs, deepseek_client, yandex_client)
     ]
 
     for middleware_type in middleware_types:
@@ -123,8 +124,9 @@ async def main():
 
     dialogs = Dialogs()
     deepseek_client = DeepSeek("sk-16e9f2f1567d46e1afc0f27cfc5035a6")
+    yandex_client = YandexOCR("y0__xCo6ajKBBjB3RMglYuAlhKzI12cXF0j586Ujx9S4zLvhuruiA")
 
-    register_global_middlewares(dp, config, dialogs, deepseek_client)
+    register_global_middlewares(dp, config, dialogs, deepseek_client, yandex_client)
     register_database_middleware(session_pool)
 
     await on_startup(bot, config.telegram_bot.admin_ids)

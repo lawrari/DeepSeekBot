@@ -24,7 +24,10 @@ class Dialog:
     
     async def is_older_than_24h(self):
         return datetime.now() - self.created_at > timedelta(hours=24)
-
+    
+    async def clear(self):
+        self.messages = []
+    
 
 class Dialogs:
     def __init__(self, limit=1000):
