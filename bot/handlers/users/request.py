@@ -4,9 +4,9 @@ from aiogram import F
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.types import BufferedInputFile
-from aiogram.types.input_media_document import InputMediaDocument
 from aiogram.filters import Command
 from aiogram.utils.media_group import MediaGroupBuilder
+from aiogram.utils.chat_action import ChatActionSender
 
 import time
 
@@ -58,21 +58,22 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
     last_update_time = time.time()
     accumulated_chunks = []
     
-    async for chunk in ai_client.stream_response(dialog):
-        content += chunk[0]
-        accumulated_chunks += chunk[0]
-        
-        current_time = time.time()
-        is_final_chunk = chunk[1] is not None and chunk[1]
+    async with ChatActionSender(bot=message.bot, chat_id=message.from_user.id):
+        async for chunk in ai_client.stream_response(dialog):
+            content += chunk[0]
+            accumulated_chunks += chunk[0]
+            
+            current_time = time.time()
+            is_final_chunk = chunk[1] is not None and chunk[1]
 
-        if current_time - last_update_time >= 2 or is_final_chunk:
-            try:
-                formatted_text = Formattor.format_text("".join(content))[0]
-                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
-                accumulated_chunks = []
-                last_update_time = current_time
-            except Exception as e:
-                print(f"Update error: {e}")
+            if current_time - last_update_time >= 2 or is_final_chunk:
+                try:
+                    formatted_text = Formattor.format_text("".join(content))[0]
+                    await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                    accumulated_chunks = []
+                    last_update_time = current_time
+                except Exception as e:
+                    print(f"Update error: {e}")
 
     final_text_with_files = Formattor.format_text("".join(content))
     
@@ -181,21 +182,22 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
     last_update_time = time.time()
     accumulated_chunks = []
     
-    async for chunk in ai_client.stream_response(dialog):
-        content += chunk[0]
-        accumulated_chunks += chunk[0]
-        
-        current_time = time.time()
-        is_final_chunk = chunk[1] is not None and chunk[1]
+    async with ChatActionSender(bot=message.bot, chat_id=message.from_user.id):
+        async for chunk in ai_client.stream_response(dialog):
+            content += chunk[0]
+            accumulated_chunks += chunk[0]
+            
+            current_time = time.time()
+            is_final_chunk = chunk[1] is not None and chunk[1]
 
-        if current_time - last_update_time >= 2 or is_final_chunk:
-            try:
-                formatted_text = Formattor.format_text("".join(content))[0]
-                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
-                accumulated_chunks = []
-                last_update_time = current_time
-            except Exception as e:
-                print(f"Update error: {e}")
+            if current_time - last_update_time >= 2 or is_final_chunk:
+                try:
+                    formatted_text = Formattor.format_text("".join(content))[0]
+                    await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                    accumulated_chunks = []
+                    last_update_time = current_time
+                except Exception as e:
+                    print(f"Update error: {e}")
 
     final_text_with_files = Formattor.format_text("".join(content))
     
@@ -233,21 +235,22 @@ async def text_request(message: Message, dialog: Dialog, ai_client: DeepSeek, re
     last_update_time = time.time()
     accumulated_chunks = []
     
-    async for chunk in ai_client.stream_response(dialog):
-        content += chunk[0]
-        accumulated_chunks += chunk[0]
-        
-        current_time = time.time()
-        is_final_chunk = chunk[1] is not None and chunk[1]
+    async with ChatActionSender(bot=message.bot, chat_id=message.from_user.id):
+        async for chunk in ai_client.stream_response(dialog):
+            content += chunk[0]
+            accumulated_chunks += chunk[0]
+            
+            current_time = time.time()
+            is_final_chunk = chunk[1] is not None and chunk[1]
 
-        if current_time - last_update_time >= 2 or is_final_chunk:
-            try:
-                formatted_text = Formattor.format_text("".join(content))[0]
-                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
-                accumulated_chunks = []
-                last_update_time = current_time
-            except Exception as e:
-                print(f"Update error: {e}")
+            if current_time - last_update_time >= 2 or is_final_chunk:
+                try:
+                    formatted_text = Formattor.format_text("".join(content))[0]
+                    await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                    accumulated_chunks = []
+                    last_update_time = current_time
+                except Exception as e:
+                    print(f"Update error: {e}")
     
     final_text_with_files = Formattor.format_text("".join(content))
 

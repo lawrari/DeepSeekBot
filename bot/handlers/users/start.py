@@ -82,9 +82,9 @@ referral_start_router = Router()
 @user_start_router.message(CommandStart())
 async def start_handler(message: Message, user: User):
     text = (
-        "**⭐️ Я — ваш универсальный помощник!**\n"
+        "**⭐️ Я — ваш универсальный помощник\!**\n"
         "**⚡️ Сейчас у вас ∞ бесплатных запросов**\n\n"
-        "Пока что пользоваться мной можно бесплатно и без ограничений, поделись с друзьями!\n\n"
-        "*Просто напиши свой вопрос для начала работы!*"
+        "Пока что пользоваться мной можно бесплатно и без ограничений, поделись с друзьями\!\n\n"
+        "*Просто напиши свой вопрос для начала работы\!*"
     )
-    await message.answer(text)
+    await message.answer(text, parse_mode="MarkdownV2")

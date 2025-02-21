@@ -1,12 +1,28 @@
-version: '3.8'
+version: '3.16'
 
 services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 537787
+      POSTGRES_DB: aiodb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
   bot:
     image: "bot"
+    depends_on:
+      - db
     stop_signal: SIGINT
     build:
       context: .
     working_dir: "/app/bot"
+    networks:
+      - app-network
     volumes:
       - .:/app/bot
     command: "python3 -m bot"
@@ -18,3 +34,9 @@ services:
         options:
             max-size: "200k"
             max-file: "10"
+
+networks:
+  app-network:
+
+volumes:
+  postgres_data:
