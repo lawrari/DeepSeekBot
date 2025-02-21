@@ -74,7 +74,6 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
 
 @request_router.message(F.document)
 async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek, yandex_ocr: YandexOCR):
-    print('ok')
     if len(dialog) > 0 and dialog[-1]['role'] == 'user':
         await message.answer("Дождитесь ответа на предыдущее сообщение")
         return
@@ -145,6 +144,7 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
             extracted = FilesToText.file_to_text(file)
             full_request = f"Текст в файле: {extracted}. {user_request}"
         except Exception as e:
+            await message.answer("Этот тип файла пока не поддерживается :(((")
             print(e)
     
     await dialog.add_user_message(full_request)
