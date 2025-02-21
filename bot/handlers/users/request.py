@@ -1,12 +1,14 @@
 import io
 
+from aiogram import F
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.types import BufferedInputFile
+from aiogram.types.input_media_document import InputMediaDocument
 from aiogram.filters import Command
-from aiogram import F
+from aiogram.utils.media_group import MediaGroupBuilder
 
-import asyncio
+import time
 
 from services.apis.DeepSeek.dialogs import Dialog
 from services.apis.DeepSeek.deepseek import DeepSeek
@@ -22,13 +24,16 @@ request_router = Router()
 @request_router.message(Command("reset"))
 async def reset_context(message: Message, dialog: Dialog):
     await dialog.clear()
-    await message.answer("Контекст очищен")
+    await message.answer("🗑️・История диалога очищена")
 
 
 @request_router.message(F.photo)
 async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, yandex_ocr: YandexOCR):
+    if message.media_group_id:
+        await message.answer("👾・Отправляейте файлы по одному!")
+        return
     if len(dialog) > 0 and dialog[-1]['role'] == 'user':
-        await message.answer("Дождитесь ответа на предыдущее сообщение")
+        await message.answer("⏳・Дождитесь ответа на прошлый запрос")
         return
 
     user_request = message.caption
@@ -49,22 +54,40 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
 
     content = []
     response_message = await message.answer("Отправка запроса...")
+
+    last_update_time = time.time()
+    accumulated_chunks = []
+    
     async for chunk in ai_client.stream_response(dialog):
         content += chunk[0]
-        try:
-            await response_message.edit_text(Formattor.format_text(content)[0], parse_mode="MarkdownV2")
-            await asyncio.sleep(0.15)
-        except Exception as e:
-            print(e)
+        accumulated_chunks += chunk[0]
+        
+        current_time = time.time()
+        is_final_chunk = chunk[1] is not None and chunk[1]
+
+        if current_time - last_update_time >= 2 or is_final_chunk:
+            try:
+                formatted_text = Formattor.format_text("".join(content))[0]
+                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                accumulated_chunks = []
+                last_update_time = current_time
+            except Exception as e:
+                print(f"Update error: {e}")
 
     final_text_with_files = Formattor.format_text("".join(content))
     
     if not final_text_with_files[0]:
-        await response_message.edit_text("Ошибка на серверах DeepSek, попробуйте позже")
+        await response_message.edit_text("👾・Извините, что-то пошло не так! Попробуйте ещё раз")
         dialog.messages.pop()
     else:
         if final_text_with_files[1]:
-            for file in final_text_with_files[1]:
+            if len(final_text_with_files[1]) > 1:
+                media_group = MediaGroupBuilder()
+                for file in final_text_with_files[1]:
+                    document = BufferedInputFile(file[1], filename=file[0])
+                    media_group.add(type='document', media=document)
+                await message.answer_media_group(media=media_group.build())
+            else:
                 document = BufferedInputFile(file[1], filename=file[0])
                 await message.answer_document(document)
 
@@ -74,8 +97,11 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
 
 @request_router.message(F.document)
 async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek, yandex_ocr: YandexOCR):
+    if message.media_group_id:
+        await message.reply("👾・Отправляейте файлы по одному!")
+        return
     if len(dialog) > 0 and dialog[-1]['role'] == 'user':
-        await message.answer("Дождитесь ответа на предыдущее сообщение")
+        await message.answer("⏳・Дождитесь ответа на прошлый запрос")
         return
 
     user_request = message.caption
@@ -144,29 +170,47 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
             extracted = FilesToText.file_to_text(file)
             full_request = f"Текст в файле: {extracted}. {user_request}"
         except Exception as e:
-            await message.answer("Этот тип файла пока не поддерживается :(((")
+            await message.answer("🛠️・Извините, но я не поддерживаю этот формат")
             print(e)
     
     await dialog.add_user_message(full_request)
 
     content = []
     response_message = await message.answer("Отправка запроса...")
+
+    last_update_time = time.time()
+    accumulated_chunks = []
+    
     async for chunk in ai_client.stream_response(dialog):
         content += chunk[0]
-        try:
-            await response_message.edit_text(Formattor.format_text(content)[0], parse_mode="MarkdownV2")
-            await asyncio.sleep(0.15)
-        except Exception as e:
-            print(e)
+        accumulated_chunks += chunk[0]
+        
+        current_time = time.time()
+        is_final_chunk = chunk[1] is not None and chunk[1]
+
+        if current_time - last_update_time >= 2 or is_final_chunk:
+            try:
+                formatted_text = Formattor.format_text("".join(content))[0]
+                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                accumulated_chunks = []
+                last_update_time = current_time
+            except Exception as e:
+                print(f"Update error: {e}")
 
     final_text_with_files = Formattor.format_text("".join(content))
     
     if not final_text_with_files[0]:
-        await response_message.edit_text("Ошибка на серверах DeepSek, попробуйте позже")
+        await response_message.edit_text("👾・Извините, что-то пошло не так! Попробуйте ещё раз")
         dialog.messages.pop()
     else:
         if final_text_with_files[1]:
-            for file in final_text_with_files[1]:
+            if len(final_text_with_files[1]) > 1:
+                media_group = MediaGroupBuilder()
+                for file in final_text_with_files[1]:
+                    document = BufferedInputFile(file[1], filename=file[0])
+                    media_group.add(type='document', media=document)
+                await message.answer_media_group(media=media_group.build())
+            else:
                 document = BufferedInputFile(file[1], filename=file[0])
                 await message.answer_document(document)
 
@@ -177,33 +221,54 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
 @request_router.message()
 async def text_request(message: Message, dialog: Dialog, ai_client: DeepSeek, repo: RequestsRepo):
     if len(dialog) > 0 and dialog[-1]['role'] == 'user':
-        await message.answer("Дождитесь ответа на предыдущее сообщение")
+        await message.answer("⏳・Дождитесь ответа на прошлый запрос")
         return
 
     user_request = message.text
-
     await dialog.add_user_message(user_request)
 
     content = []
     response_message = await message.answer("Отправка запроса...")
+    
+    last_update_time = time.time()
+    accumulated_chunks = []
+    
     async for chunk in ai_client.stream_response(dialog):
         content += chunk[0]
-        try:
-            await response_message.edit_text(Formattor.format_text(content)[0], parse_mode="MarkdownV2")
-            await asyncio.sleep(0.2)
-        except Exception as e:
-            print(e)
+        accumulated_chunks += chunk[0]
+        
+        current_time = time.time()
+        is_final_chunk = chunk[1] is not None and chunk[1]
 
+        if current_time - last_update_time >= 2 or is_final_chunk:
+            try:
+                formatted_text = Formattor.format_text("".join(content))[0]
+                await response_message.edit_text(formatted_text, parse_mode="MarkdownV2")
+                accumulated_chunks = []
+                last_update_time = current_time
+            except Exception as e:
+                print(f"Update error: {e}")
+    
     final_text_with_files = Formattor.format_text("".join(content))
 
     if not final_text_with_files[0]:
-        await response_message.edit_text("Ошибка на серверах DeepSek, попробуйте позже")
+        await response_message.edit_text("👾・Извините, что-то пошло не так! Попробуйте ещё раз")
         dialog.messages.pop()
     else:
+        try:
+            await response_message.edit_text(final_text_with_files[0], parse_mode="MarkdownV2")
+        except Exception as e:
+            print(f"Final update error: {e}")
+            
         if final_text_with_files[1]:
-            for file in final_text_with_files[1]:
+            if len(final_text_with_files[1]) > 1:
+                media_group = MediaGroupBuilder()
+                for file in final_text_with_files[1]:
+                    document = BufferedInputFile(file[1], filename=file[0])
+                    media_group.add(type='document', media=document)
+                await message.answer_media_group(media=media_group.build())
+            else:
                 document = BufferedInputFile(file[1], filename=file[0])
                 await message.answer_document(document)
-
         
         await dialog.add_assistant_message("".join(content))

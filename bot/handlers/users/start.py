@@ -34,58 +34,57 @@ referral_start_router = Router()
 #         )
 
 
-@referral_start_router.message(CommandStart(deep_link=True))
-async def referral_handler(message: Message, command: CommandObject, repo: RequestsRepo):
-    args = command.args
-    invitor = int(decode_payload(args))
-    invitee = int(message.from_user.id)
+# @referral_start_router.message(CommandStart(deep_link=True))
+# async def referral_handler(message: Message, command: CommandObject, repo: RequestsRepo):
+#     args = command.args
+#     invitor = int(decode_payload(args))
+#     invitee = int(message.from_user.id)
 
-    keyboard = await get_main_menu_keyboard()
+#     keyboard = await get_main_menu_keyboard()
 
-    if await repo.users.user_exists(invitor):
-        if not await repo.users.user_exists(invitee):
-            user = await repo.users.get_or_create_user_and_profile(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                full_name=message.from_user.full_name,
-                language=message.from_user.language_code,
-            )
+#     if await repo.users.user_exists(invitor):
+#         if not await repo.users.user_exists(invitee):
+#             user = await repo.users.get_or_create_user_and_profile(
+#                 telegram_id=message.from_user.id,
+#                 username=message.from_user.username,
+#                 full_name=message.from_user.full_name,
+#                 language=message.from_user.language_code,
+#             )
 
-            await repo.invitations.create_invitation(invitor, invitee)
+#             await repo.invitations.create_invitation(invitor, invitee)
 
-            subscription = await repo.subscriptions.get_subscription(2)
-            text_requests = subscription.requests_amount
-            image_requests = subscription.image_requests_amount
+#             subscription = await repo.subscriptions.get_subscription(2)
+#             text_requests = subscription.requests_amount
+#             image_requests = subscription.image_requests_amount
 
-            await repo.profiles.add_requests(user.profile.profile_id, text_requests, image_requests)
+#             await repo.profiles.add_requests(user.profile.profile_id, text_requests, image_requests)
 
-            await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
-                                f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
-                                "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
-        else:
-            await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
-                                f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
-                                "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
-    else:
-        user = await repo.users.get_or_create_user_and_profile(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                full_name=message.from_user.full_name,
-                language=message.from_user.language_code,
-            )
+#             await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
+#                                 f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
+#                                 "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
+#         else:
+#             await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
+#                                 f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
+#                                 "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
+#     else:
+#         user = await repo.users.get_or_create_user_and_profile(
+#                 telegram_id=message.from_user.id,
+#                 username=message.from_user.username,
+#                 full_name=message.from_user.full_name,
+#                 language=message.from_user.language_code,
+#             )
 
-        await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
-                            f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
-                            "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
+#         await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
+#                             f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
+#                             "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
 
 
 @user_start_router.message(CommandStart())
 async def start_handler(message: Message, user: User):
-    keyboard = await get_main_menu_keyboard()
-    referrals = user.referrals
-    ref_count = len(referrals)
-    if ref_count > 0:
-        await message.answer(f"Вы пригласили {ref_count} людей!")
-    await message.answer("<b>⭐️ Я — ваш универсальный помощник!\n" \
-                        f"⚡️ Сейчас у вас {user.profile.text_requests} текстовых запроса и {user.profile.image_requests} запросов с изображением</b>\n\n" \
-                        "<i>Просто напиши свой вопрос для начала работы!</i>", reply_markup=keyboard, parse_mode="HTML")
+    text = (
+        "**⭐️ Я — ваш универсальный помощник!**\n"
+        "**⚡️ Сейчас у вас ∞ бесплатных запросов**\n\n"
+        "Пока что пользоваться мной можно бесплатно и без ограничений, поделись с друзьями!\n\n"
+        "*Просто напиши свой вопрос для начала работы!*"
+    )
+    await message.answer(text)
