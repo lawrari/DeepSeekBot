@@ -89,7 +89,7 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
                     media_group.add(type='document', media=document)
                 await message.answer_media_group(media=media_group.build())
             else:
-                document = BufferedInputFile(file[1], filename=file[0])
+                document = BufferedInputFile(final_text_with_files[1][1], filename=final_text_with_files[1][0])
                 await message.answer_document(document)
 
         
@@ -213,7 +213,7 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
                     media_group.add(type='document', media=document)
                 await message.answer_media_group(media=media_group.build())
             else:
-                document = BufferedInputFile(file[1], filename=file[0])
+                document = BufferedInputFile(final_text_with_files[1][1], filename=final_text_with_files[1][0])
                 await message.answer_document(document)
 
         
@@ -271,7 +271,7 @@ async def text_request(message: Message, dialog: Dialog, ai_client: DeepSeek, re
                     media_group.add(type='document', media=document)
                 await message.answer_media_group(media=media_group.build())
             else:
-                document = BufferedInputFile(file[1], filename=file[0])
+                document = BufferedInputFile(final_text_with_files[1][1], filename=final_text_with_files[1][0])
                 await message.answer_document(document)
         
         await dialog.add_assistant_message("".join(content))
