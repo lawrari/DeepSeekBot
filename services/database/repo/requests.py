@@ -7,6 +7,7 @@ from services.database.repo.invitations import InvitationsRepo
 from services.database.repo.usages import UsagesRepo
 from services.database.repo.profiles import ProfilesRepo
 from services.database.repo.subscriptions import SubscriptionsRepo
+from services.database.repo.payments import PaymentsRepo
 
 @dataclass
 class RequestsRepo:
@@ -37,3 +38,7 @@ class RequestsRepo:
     @property
     def subscriptions(self) -> SubscriptionsRepo:
         return SubscriptionsRepo(self.session)
+    
+    @property
+    def payments(self) -> PaymentsRepo:
+        return PaymentsRepo(self.session)

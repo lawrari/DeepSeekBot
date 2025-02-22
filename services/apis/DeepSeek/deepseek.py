@@ -1,5 +1,5 @@
 from openai import AsyncOpenAI
-from services.apis.DeepSeek.dialogs import Dialog
+from services.apis.deepseek.dialogs import Dialog
 
 
 class DeepSeek:

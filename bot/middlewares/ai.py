@@ -3,8 +3,8 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
-from services.apis.DeepSeek.dialogs import Dialogs
-from services.apis.DeepSeek.deepseek import DeepSeek
+from services.apis.deepseek.dialogs import Dialogs
+from services.apis.deepseek.deepseek import DeepSeek
 from services.apis.yandex_api import YandexOCR
 
 

@@ -4,6 +4,7 @@ from config.config import DbConfig
 
 
 def create_engine(db: DbConfig, echo=False):
+    print(db.construct_sqlalchemy_url())
     engine = create_async_engine(
         db.construct_sqlalchemy_url(),
         query_cache_size=1200,

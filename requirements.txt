@@ -16,3 +16,5 @@ openpyxl
 python-docx
 python-pptx
 pandas
+yookassa
+fastapi[standard]

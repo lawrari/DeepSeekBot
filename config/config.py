@@ -149,8 +149,22 @@ class Miscellaneous:
         A boolean used to enable/disable the bot maintenance mode (default is False).
     """
 
-    bot_enabled: bool = True
-    bot_maintenance: bool = False
+    deepseek_api_key: str = ""
+    yandex_api_key: str = ""
+    yookassa_secret_key: str = ""
+    yookassa_shop_id: int = ""
+
+    @staticmethod
+    def from_env(env: Env):
+        """
+        Creates the TgBot object from environment variables.
+        """
+
+        deepseek_api_key = env.str("DEEPSEEK_API_KEY")
+        yandex_api_key = env.str("YANDEX_API_KEY")
+        yookassa_secret_key = env.str("YOOKASSA_SECRET_KEY")
+        yookassa_shop_id = env.int("YOOKASSA_SHOP_ID")
+        return Miscellaneous(deepseek_api_key=deepseek_api_key, yandex_api_key=yandex_api_key, yookassa_secret_key=yookassa_secret_key, yookassa_shop_id=yookassa_shop_id)
 
 
 @dataclass
@@ -195,5 +209,5 @@ def load_config(path: str = None) -> Config:
         telegram_bot=TelegramBot.from_env(env),
         db=DbConfig.from_env(env),
         # redis=RedisConfig.from_env(env),
-        misc=Miscellaneous(),
+        misc=Miscellaneous.from_env(env),
     )

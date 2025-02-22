@@ -10,9 +10,9 @@ from aiogram.utils.chat_action import ChatActionSender
 
 import time
 
-from services.apis.DeepSeek.dialogs import Dialog
-from services.apis.DeepSeek.deepseek import DeepSeek
-from services.apis.DeepSeek.formatting import Formattor
+from services.apis.deepseek.dialogs import Dialog
+from services.apis.deepseek.deepseek import DeepSeek
+from services.apis.deepseek.formatting import Formattor
 from services.apis.yandex_api import YandexOCR
 from services.database.repo.requests import RequestsRepo
 

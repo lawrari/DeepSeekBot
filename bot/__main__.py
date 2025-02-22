@@ -15,14 +15,18 @@ from bot.middlewares.config import ConfigMiddleware
 from bot.middlewares.database import DatabaseMiddleware
 from bot.middlewares.referral import ReferralMiddleware
 from bot.middlewares.ai import AiMiddleware
+from bot.middlewares.yookassa import YookassaMiddleware
 from bot.utils import broadcaster
-from services.apis.DeepSeek.dialogs import Dialogs
-from services.apis.DeepSeek.deepseek import DeepSeek
+from services.apis.deepseek.dialogs import Dialogs
+from services.apis.deepseek.deepseek import DeepSeek
 from services.apis.yandex_api import YandexOCR
+from services.apis.payments.yookassa_helper import YooKassaHelper
+
 
 from bot.handlers import (referral_start_router,
                           admin_start_router,
                           maintenance_router,
+                          payments_router,
                           request_router,
                           user_start_router)
 
@@ -51,7 +55,7 @@ def register_database_middleware(session_pool=None):
     user_start_router.callback_query.outer_middleware(DatabaseMiddleware(session_pool))
     request_router.message.outer_middleware(DatabaseMiddleware(session_pool))
     referral_start_router.message.outer_middleware(ReferralMiddleware(session_pool))
-    
+    payments_router.message.outer_middleware(DatabaseMiddleware(session_pool))
 
 
 
@@ -108,8 +112,13 @@ async def main():
 
     config = load_config(".env")
     storage = get_storage(config)
+
     engine = create_engine(config.db)
     session_pool = create_session_pool(engine)
+
+    async with engine.begin() as conn:
+        # await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
 
     async with engine.begin() as conn:
         # await conn.run_sync(Base.metadata.drop_all)
@@ -123,11 +132,13 @@ async def main():
     dp.include_routers(*routers_list)
 
     dialogs = Dialogs()
-    deepseek_client = DeepSeek("sk-16e9f2f1567d46e1afc0f27cfc5035a6")
-    yandex_client = YandexOCR("y0__xCo6ajKBBjB3RMglYuAlhKzI12cXF0j586Ujx9S4zLvhuruiA")
+    deepseek_client = DeepSeek(config.misc.deepseek_api_key)
+    yandex_client = YandexOCR(config.misc.yandex_api_key)
+    yookassa_client = YooKassaHelper(config.misc.yookassa_shop_id, config.misc.yookassa_secret_key)
 
     register_global_middlewares(dp, config, dialogs, deepseek_client, yandex_client)
     register_database_middleware(session_pool)
+    payments_router.message.outer_middleware(YookassaMiddleware(yookassa_client))
 
     await on_startup(bot, config.telegram_bot.admin_ids)
     await dp.start_polling(bot)

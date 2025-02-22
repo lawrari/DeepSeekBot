@@ -8,4 +8,4 @@ class MaintenanceFilter(BaseFilter):
     maintenance: bool = True
 
     async def __call__(self, obj: Message, config: Config) -> bool:
-        return config.misc.bot_maintenance == self.maintenance
+        return False

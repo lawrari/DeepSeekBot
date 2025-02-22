@@ -4,3 +4,4 @@ from .invitations import Invitation
 from .profiles import Profile
 from .subscriptions import Subscription
 from .usages import Usage
+from .payments import Payment
