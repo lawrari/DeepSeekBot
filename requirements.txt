@@ -18,3 +18,4 @@ python-pptx
 pandas
 yookassa
 fastapi[standard]
+md2tgmd
