@@ -3,6 +3,13 @@ from openpyxl.utils import get_column_letter
 from io import BytesIO
 from md2tgmd import escape
 
+def checkTableLine(line):
+    a = line.strip()
+    if (a.startswith("\\|") and a.endswith("\\|") or a.startswith("\\+") and a.endswith("\\+") or a.startswith("|") and a.endswith("|") or a.startswith("+") and a.endswith("+")):
+        return True
+
+    return False
+
 
 class Formattor:
 
@@ -18,19 +25,21 @@ class Formattor:
 
         files = []
 
+        print(lines)
+
         while i < len(lines):
             if (
-                ((lines[i].startswith("\\|") and lines[i].endswith("\\|")) or (lines[i].startswith("\\+") and lines[i].endswith("\\+")) or (lines[i].startswith("|") and lines[i].endswith("|")) or (lines[i].startswith("+") and lines[i].endswith("+")) )
+                checkTableLine(lines[i])
                 and
                 i + 2 < len(lines) and 
-                ((lines[i+1].startswith("\\|") and lines[i+1].endswith("\\|")) or (lines[i+1].startswith("\\+") and lines[i+1].endswith("\\+")) or (lines[i+1].startswith("|") and lines[i+1].endswith("|")) or (lines[i+1].startswith("+") and lines[i+1].endswith("+")) )
+                checkTableLine(lines[i+1])
                 and
-                ( (lines[i+2].startswith("\\|") and lines[i+2].endswith("\\|")) or (lines[i+2].startswith("\\+") and lines[i+2].endswith("\\+")) or (lines[i+2].startswith("|") and lines[i+2].endswith("|")) or (lines[i+2].startswith("+") and lines[i+2].endswith("+")) )):
+                checkTableLine(lines[i+2])):
                 j = i + 3
 
                 table = []
 
-                while j < len(lines) and  ( (lines[j].startswith("\\|") and lines[j].endswith("\\|")) or (lines[j].startswith("\\+") and lines[j].endswith("\\+")) or (lines[j].startswith("|") and lines[j].endswith("|")) or (lines[j].startswith("+") and lines[j].endswith("+")) ):
+                while j < len(lines) and  checkTableLine(lines[j]):
                     j += 1
                 
                 for k in range(i, j):
@@ -97,4 +106,3 @@ class Formattor:
             i += 1
         
         return ( res1, files )
-
