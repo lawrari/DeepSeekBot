@@ -43,7 +43,7 @@ class Formattor:
                 for k in range(i, j):
                     table.append(lines[k].replace("\\", "").replace("+", "|"))
 
-                if(len(lines) >= j - 1 and (lines[j].startswith("\\|") or lines[j].startswith("\\+") or lines[j].startswith("|") or lines[j].startswith("+"))):
+                if(len(lines) > j and (lines[j].startswith("\\|") or lines[j].startswith("\\+") or lines[j].startswith("|") or lines[j].startswith("+"))):
                     lines[j] = ""
 
                 lines = lines[:i] + ["Таблица " + f"table\\_{len(files)}\\.xlsx"] + lines[j:]
