@@ -25,8 +25,6 @@ class Formattor:
 
         files = []
 
-        print(lines)
-
         while i < len(lines):
             if (
                 checkTableLine(lines[i])
