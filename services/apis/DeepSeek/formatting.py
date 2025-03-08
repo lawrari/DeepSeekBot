@@ -3,15 +3,15 @@ from openpyxl.utils import get_column_letter
 from io import BytesIO
 from md2tgmd import escape
 
-def checkTableLine(line):
-    a = line.strip()
-    if (a.startswith("\\|") and a.endswith("\\|") or a.startswith("\\+") and a.endswith("\\+") or a.startswith("|") and a.endswith("|") or a.startswith("+") and a.endswith("+")):
-        return True
-
-    return False
-
 
 class Formattor:
+    @staticmethod
+    def checkTableLine(line):
+        a = line.strip()
+        if (a.startswith("\\|") and a.endswith("\\|") or a.startswith("\\+") and a.endswith("\\+") or a.startswith("|") and a.endswith("|") or a.startswith("+") and a.endswith("+")):
+            return True
+
+        return False
 
     @staticmethod
     def format_text(text):
@@ -27,17 +27,17 @@ class Formattor:
 
         while i < len(lines):
             if (
-                checkTableLine(lines[i])
+                Formattor.checkTableLine(lines[i])
                 and
                 i + 2 < len(lines) and 
-                checkTableLine(lines[i+1])
+                Formattor.checkTableLine(lines[i+1])
                 and
-                checkTableLine(lines[i+2])):
+                Formattor.checkTableLine(lines[i+2])):
                 j = i + 3
 
                 table = []
 
-                while j < len(lines) and  checkTableLine(lines[j]):
+                while j < len(lines) and Formattor.checkTableLine(lines[j]):
                     j += 1
                 
                 for k in range(i, j):
