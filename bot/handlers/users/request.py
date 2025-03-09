@@ -260,6 +260,10 @@ async def text_request(message: Message, dialog: Dialog, ai_client: DeepSeek, us
         return
 
     user_request = message.text
+
+    if(user_request is None or user_request == ""):
+        return
+
     await dialog.add_user_message(user_request)
 
     content = ''
