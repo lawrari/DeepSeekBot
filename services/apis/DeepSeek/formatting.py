@@ -115,5 +115,7 @@ class Formattor:
             i += 1
 
         res1 = res1.replace("\\\\boxed", "")
-        
+        res1 = res1.replace("\\\\dfrac", "")
+        res1 = res1.replace("\\\\frac", "")
+
         return ( res1, files )
