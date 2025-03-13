@@ -2,9 +2,15 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from io import BytesIO
 from md2tgmd import escape
-
+import re
 
 class Formattor:
+    @staticmethod
+    def replace_stars(input_string):
+        input_string = re.sub(r'\*\*\*(.+?)\*\*\*', r'**_\1_**', input_string)
+        input_string = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'_\1_', input_string)
+        return input_string
+
     @staticmethod
     def checkTableLine(line):
         a = line.strip()
@@ -15,6 +21,8 @@ class Formattor:
 
     @staticmethod
     def format_text(text):
+        text = Formattor.replace_stars(text)
+
         text = escape(text)
 
         text = text.replace(" •", " –")
@@ -105,5 +113,7 @@ class Formattor:
             else:
                 res1 += res[i]
             i += 1
+
+        res1 = res1.replace("\\\\boxed", "")
         
         return ( res1, files )
