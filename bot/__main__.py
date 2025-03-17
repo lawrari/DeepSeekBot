@@ -119,11 +119,6 @@ async def main():
     async with engine.begin() as conn:
         # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-
-    async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
     
     properties = DefaultBotProperties(parse_mode="HTML")
     bot = Bot(token=config.telegram_bot.token, properties=properties)

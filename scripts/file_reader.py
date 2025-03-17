@@ -5,7 +5,8 @@ import openpyxl
 from openpyxl.drawing.image import Image as XlsxImage
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
-
+# from io import BytesIO
+from PyPDF2 import PdfReader
 
 class FilesToText:
 
@@ -256,6 +257,7 @@ class FilesToText:
         
         return result
     
+    @staticmethod
     def file_to_text(file_bytes: bytes, encoding: str = "utf-8") -> str:
         """
         Converts bytes of a text-based file into a string.
@@ -271,3 +273,15 @@ class FilesToText:
             return file_bytes.read().decode(encoding)
         except UnicodeDecodeError:
             return file_bytes.decode("utf-8", errors="replace")
+
+    @staticmethod
+    def pdf_to_text(file_bytes: bytes) -> str:
+        text = ""
+
+        reader = PdfReader(file_bytes)
+        
+        # Проходим по всем страницам
+        for page in reader.pages:
+            text += page.extract_text()
+        
+        return text

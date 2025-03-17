@@ -122,7 +122,7 @@ async def image_request(message: Message, dialog: Dialog, ai_client: DeepSeek, y
 @request_router.message(F.document)
 async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek, yandex_ocr: YandexOCR, user: User):
     if message.media_group_id:
-        await message.reply("👾・Отправляейте файлы по одному!")
+        await message.reply("👾・Отправляйте файлы по одному!")
         return
     if len(dialog) > 0 and dialog[-1]['role'] == 'user':
         await message.answer("⏳・Дождитесь ответа на прошлый запрос")
@@ -133,74 +133,91 @@ async def document_request(message: Message, dialog: Dialog, ai_client: DeepSeek
     file_id = message.document.file_id
     filename = message.document.file_name
     file_bytes = io.BytesIO()
-    file = await message.bot.download(file=file_id, destination=file_bytes)
+    
+    file_size_mb = message.document.file_size / 1024 / 1024
 
-    if filename.endswith('.docx'):
-        extracted = FilesToText.extract_docx_content(file)
-        extracted_text = extracted['text']
-        if extracted['images']:
-            extracted_images = extracted['images']
-            extracted_images_texts = []
-            counter = 1
-            for image in extracted_images:
-                base64_image = yandex_ocr.encode_file(image)
-                image_text = await yandex_ocr.recognize(base64_image)
-                if image_text is None:
-                    image_text = "отстутствует"
-                extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
-        else:
-            extracted_images_texts = ['отстутствуют']
-
-        full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
-
-    elif filename.endswith('.xlsx'):
-        extracted = FilesToText.extract_xlsx_content(file)
-        extracted_text = extracted['text']
-        if extracted['images']:
-            extracted_images = extracted['images']
-            extracted_images_texts = []
-            counter = 1
-            for image in extracted_images:
-                base64_image = yandex_ocr.encode_file(image)
-                image_text = await yandex_ocr.recognize(base64_image)
-                if image_text is None:
-                    image_text = "отстутствует"
-                extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
-        else:
-            extracted_images_texts = ['отстутствуют']
-
-        full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
-
-    elif filename.endswith('.pptx'):
-        extracted = FilesToText.extract_pptx_content(file)
-        extracted_text = extracted['text']
-        if extracted['images']:
-            extracted_images = extracted['images']
-            extracted_images_texts = []
-            counter = 1
-            for image in extracted_images:
-                base64_image = yandex_ocr.encode_file(image)
-                image_text = await yandex_ocr.recognize(base64_image)
-                if image_text is None:
-                    image_text = "отстутствует"
-                extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
-        else:
-            extracted_images_texts = ['отстутствуют']
-
-        full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
-
+    if(file_size_mb > 10):
+        full_request = f"Текст в файле: Не удалось прочитать файл, размер файла превышает 10 МБ. {user_request}"
     else:
-        try:
-            extracted = FilesToText.file_to_text(file)
+        response_message = await message.answer("⏳・Чтение файла…")
+
+        file = await message.bot.download(file=file_id, destination=file_bytes)
+        if filename.endswith('.docx'):
+            
+
+            extracted = FilesToText.extract_docx_content(file)
+            extracted_text = extracted['text']
+            if extracted['images']:
+                extracted_images = extracted['images']
+                extracted_images_texts = []
+                counter = 1
+                for image in extracted_images:
+                    base64_image = yandex_ocr.encode_file(image)
+                    image_text = await yandex_ocr.recognize(base64_image)
+                    if image_text is None:
+                        image_text = "отстутствует"
+                    extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
+            else:
+                extracted_images_texts = ['отстутствуют']
+
+            full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
+
+        elif filename.endswith('.xlsx'):
+            extracted = FilesToText.extract_xlsx_content(file)
+            extracted_text = extracted['text']
+            if extracted['images']:
+                extracted_images = extracted['images']
+                extracted_images_texts = []
+                counter = 1
+                for image in extracted_images:
+                    base64_image = yandex_ocr.encode_file(image)
+                    image_text = await yandex_ocr.recognize(base64_image)
+                    if image_text is None:
+                        image_text = "отстутствует"
+                    extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
+            else:
+                extracted_images_texts = ['отстутствуют']
+
+            full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
+
+        elif filename.endswith('.pptx'):
+            extracted = FilesToText.extract_pptx_content(file)
+            extracted_text = extracted['text']
+            if extracted['images']:
+                extracted_images = extracted['images']
+                extracted_images_texts = []
+                counter = 1
+                for image in extracted_images:
+                    base64_image = yandex_ocr.encode_file(image)
+                    image_text = await yandex_ocr.recognize(base64_image)
+                    if image_text is None:
+                        image_text = "отстутствует"
+                    extracted_images_texts.append(f"Изображение номер {counter}: {image_text}")
+            else:
+                extracted_images_texts = ['отстутствуют']
+
+            full_request = f"Текст в файле: {extracted_text}. Текста на изображенниях: {','.join(extracted_images_texts)}. {user_request}"
+
+        elif filename.endswith('.pdf'):
+            extracted = FilesToText.pdf_to_text(file)
             full_request = f"Текст в файле: {extracted}. {user_request}"
-        except Exception as e:
-            await message.answer("🛠️・Извините, но я не поддерживаю этот формат")
-            print(e, flush=True)
+
+        else:
+            try:
+                extracted = FilesToText.file_to_text(file)
+                full_request = f"Текст в файле: {extracted}. {user_request}"
+            except Exception as e:
+                await message.answer("🛠️・Извините, но я не поддерживаю этот формат")
+                print(e, flush=True)
 
     await dialog.add_user_message(full_request)
 
     content = ''
-    response_message = await message.answer("⏳・Отправка запроса…")
+    if(response_message is not None):
+        # edit
+        await response_message.edit_text("⏳・Отправка запроса…")
+    else:    
+        response_message = await message.answer("⏳・Отправка запроса…")
 
     last_update_time = time.time()
 
