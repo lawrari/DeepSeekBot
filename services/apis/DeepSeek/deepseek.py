@@ -1,5 +1,6 @@
 from openai import AsyncOpenAI
 from services.apis.deepseek.dialogs import Dialog
+import time
 
 
 class DeepSeek:
@@ -10,14 +11,19 @@ class DeepSeek:
         self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
 
     
-    async def stream_response(self, dialog: Dialog):
+    async def stream_response(self, dialog: Dialog, model: str):
         response = await self.client.chat.completions.create(
-            model=self.model,
+            model=model,
             messages=dialog.messages,
             stream=True,
             stream_options={"include_usage": True}
         )
 
         async for chunk in response:
-            if chunk.choices[0].delta.content and chunk.choices[0].delta.content != " ":
-                yield chunk.choices[0].delta.content, chunk.usage
+            if chunk.choices[0].delta.content or (hasattr(chunk.choices[0].delta, "reasoning_content") and chunk.choices[0].delta.reasoning_content):
+                if hasattr(chunk.choices[0].delta, "reasoning_content"):
+                    yield chunk.choices[0].delta.content, chunk.choices[0].delta.reasoning_content, chunk.usage
+                else:
+                    yield chunk.choices[0].delta.content, None, chunk.usage
+                
+            

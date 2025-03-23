@@ -19,3 +19,4 @@ pandas
 yookassa
 fastapi[standard]
 md2tgmd
+PyPDF2
